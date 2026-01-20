@@ -1,0 +1,70 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Extract version from tag
+        id: tag_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Tag version: $VERSION"
+      
+      - name: Verify version in .toc file
+        run: |
+          TOC_VERSION=$(grep "^## Version:" MikScrollingBattleText/MikScrollingBattleText.toc | awk '{print $3}')
+          echo "TOC file version: $TOC_VERSION"
+          if [ "$TOC_VERSION" != "${{ steps.tag_version.outputs.VERSION }}" ]; then
+            echo "Warning: TOC version ($TOC_VERSION) does not match tag version (${{ steps.tag_version.outputs.VERSION }})"
+          fi
+      
+      - name: Create release package
+        run: |
+          mkdir -p release
+          cp -r MikScrollingBattleText release/
+          cp -r MSBTOptions release/
+          if [ -f changelog.txt ]; then
+            cp changelog.txt release/
+          fi
+          cd release
+          zip -r ../MikScrollingBattleText-${{ steps.tag_version.outputs.VERSION }}.zip .
+          cd ..
+          echo "Release package created: MikScrollingBattleText-${{ steps.tag_version.outputs.VERSION }}.zip"
+          ls -lh MikScrollingBattleText-${{ steps.tag_version.outputs.VERSION }}.zip
+      
+      - name: Generate changelog from file
+        id: changelog
+        run: |
+          if [ -f changelog.txt ]; then
+            echo "Using changelog.txt for release notes"
+            echo "body<<EOF" >> $GITHUB_OUTPUT
+            cat changelog.txt >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "No changelog.txt found, using default release notes."
+            echo "body=## Mik's Scrolling Battle Text ${{ steps.tag_version.outputs.VERSION }}" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            MikScrollingBattleText-${{ steps.tag_version.outputs.VERSION }}.zip
+          body: ${{ steps.changelog.outputs.body }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

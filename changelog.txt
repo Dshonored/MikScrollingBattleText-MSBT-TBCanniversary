@@ -1,0 +1,30 @@
+Mik's Scrolling Battle Text - Changelog
+========================================
+
+Version 1.0
+-----------
+Release Date: 2024
+
+Changes:
+--------
+- Reduced spam control slider step increments for better TBC compatibility
+  * Heal Threshold slider: Changed step increment from 100 to 50
+  * Damage Threshold slider: Changed step increment from 100 to 50
+  * Power Threshold slider: Changed step increment from 40 to 25
+  
+  These changes allow for finer control when setting spam thresholds, making it
+  easier to configure appropriate values for The Burning Crusade servers where
+  damage/healing values are typically much lower than retail.
+
+Installation:
+-------------
+1. Extract both "MikScrollingBattleText" and "MSBTOptions" folders to your
+   World of Warcraft/_classic_/Interface/AddOns/ directory
+2. Restart World of Warcraft or type /reload in-game
+3. Configure your spam control thresholds in the options menu
+
+Notes:
+------
+- This version is optimized for TBC servers
+- The spam control thresholds can now be adjusted in increments of 50 for
+  heal/damage and 25 for power, allowing for more precise filtering
