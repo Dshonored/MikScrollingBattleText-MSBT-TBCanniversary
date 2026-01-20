@@ -19,7 +19,7 @@ Changes:
 Installation:
 -------------
 1. Extract both "MikScrollingBattleText" and "MSBTOptions" folders to your
-   World of Warcraft/_classic_/Interface/AddOns/ directory
+   World of Warcraft/_anniversary_/Interface/AddOns/ directory
 2. Restart World of Warcraft or type /reload in-game
 3. Configure your spam control thresholds in the options menu
 
