@@ -1,0 +1,13 @@
+package-as: MikScrollingBattleText
+
+# Ignore files that shouldn't be packaged
+ignore:
+  - .github/
+  - .gitignore
+  - README.md
+  - changelog.txt
+  - release/
+  - *.zip
+
+# Use changelog.txt for manual changelog
+manual-changelog: changelog.txt
