@@ -8,6 +8,3 @@ ignore:
   - changelog.txt
   - release/
   - *.zip
-
-# Use changelog.txt for manual changelog
-manual-changelog: changelog.txt
