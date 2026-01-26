@@ -1,6 +1,15 @@
 Mik's Scrolling Battle Text - Changelog
 ========================================
 
+Version 1.0.3
+-------------
+Release Date: January 26, 2026
+
+Changes:
+--------
+- Fixed GitHub Actions workflow syntax error
+- Removed README.md from repository
+
 Version 1.0.2
 -------------
 Release Date: January 26, 2026
