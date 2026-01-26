@@ -9,6 +9,9 @@ Changes:
 --------
 - Fixed GitHub Actions workflow syntax error
 - Removed README.md from repository
+- Corrected TBC Anniversary interface version to 20505 (was incorrectly set to 110205)
+  * Updated both MikScrollingBattleText.toc and MSBTOptions.toc with correct interface version
+  * Addon now correctly supports Classic (11503), TBC (40400), Retail (110002), and TBC Anniversary (20505)
 
 Version 1.0.2
 -------------
