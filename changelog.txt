@@ -1,6 +1,16 @@
 Mik's Scrolling Battle Text - Changelog
 ========================================
 
+Version 1.0.2
+-------------
+Release Date: January 26, 2026
+
+Changes:
+--------
+- Updated interface version to support TBC Anniversary (110205)
+  * Added interface version 110205 for compatibility with latest TBC Anniversary client
+  * Addon now supports Classic (11503), TBC (40400), Retail (110002), and TBC Anniversary (110205)
+
 Version 1.0
 -----------
 Release Date: 2026
