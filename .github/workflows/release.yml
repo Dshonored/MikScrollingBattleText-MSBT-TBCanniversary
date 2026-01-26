@@ -67,9 +67,18 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Upload to CurseForge
-        if: ${{ secrets.CURSEFORGE_API_TOKEN != '' && secrets.CURSEFORGE_PROJECT_ID != '' }}
+        continue-on-error: true
         run: |
+          API_TOKEN="${{ secrets.CURSEFORGE_API_TOKEN }}"
           PROJECT_IDENTIFIER="${{ secrets.CURSEFORGE_PROJECT_ID }}"
+          GAME_VERSION_ID="${{ secrets.CURSEFORGE_GAME_VERSION_ID }}"
+          
+          # Check if required secrets are set
+          if [ -z "$API_TOKEN" ] || [ -z "$PROJECT_IDENTIFIER" ] || [ -z "$GAME_VERSION_ID" ]; then
+            echo "⚠️  CurseForge secrets not configured, skipping upload"
+            echo "To enable CurseForge uploads, set CURSEFORGE_API_TOKEN, CURSEFORGE_PROJECT_ID, and CURSEFORGE_GAME_VERSION_ID secrets"
+            exit 0
+          fi
           
           # Check if it's a numeric ID or a slug
           if [[ "$PROJECT_IDENTIFIER" =~ ^[0-9]+$ ]]; then
@@ -78,7 +87,7 @@ jobs:
           else
             echo "Looking up Project ID for slug: $PROJECT_IDENTIFIER"
             # Try to get project ID from slug using the API
-            PROJECT_INFO=$(curl -s -H "X-Api-Token: ${{ secrets.CURSEFORGE_API_TOKEN }}" \
+            PROJECT_INFO=$(curl -s -H "X-Api-Token: $API_TOKEN" \
               "https://wow.curseforge.com/api/projects/$PROJECT_IDENTIFIER")
             
             # Extract numeric ID from response (if API returns it)
@@ -106,7 +115,7 @@ jobs:
               'changelog': changelog,
               'changelogType': 'text',
               'displayName': '${{ steps.tag_version.outputs.VERSION }}',
-              'gameVersions': [${{ secrets.CURSEFORGE_GAME_VERSION_ID }}],
+              'gameVersions': [$GAME_VERSION_ID],
               'releaseType': '$RELEASE_TYPE'
           }
           print(json.dumps(metadata))
@@ -114,12 +123,12 @@ jobs:
           
           echo "Uploading to CurseForge..."
           echo "Project ID/Slug: $PROJECT_ID"
-          echo "Game Version ID: ${{ secrets.CURSEFORGE_GAME_VERSION_ID }}"
+          echo "Game Version ID: $GAME_VERSION_ID"
           echo "Release Type: $RELEASE_TYPE"
           
           # Upload to CurseForge API
           RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
-            -H "X-Api-Token: ${{ secrets.CURSEFORGE_API_TOKEN }}" \
+            -H "X-Api-Token: $API_TOKEN" \
             -F "metadata=$METADATA" \
             -F "file=@MikScrollingBattleText-${{ steps.tag_version.outputs.VERSION }}.zip" \
             https://wow.curseforge.com/api/projects/$PROJECT_ID/upload-file)
