@@ -1800,7 +1800,7 @@ local function Colorswatch_OnClick(this)
 	local tempB = this.b or 1
 
 	ColorPickerFrame.associatedColorSwatch = this
-	if IsClassic then
+	if IsClassic and not ColorPickerFrame.SetupColorPickerAndShow then
 		ColorPickerFrame.hasOpacity = false
 		ColorPickerFrame.opacity = 1
 		ColorPickerFrame.previousValues = {r = tempR, g = tempG, b = tempB}

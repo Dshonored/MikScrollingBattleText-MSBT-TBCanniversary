@@ -1,10 +1,13 @@
 ## Interface: 11503, 40400, 110002, 20505
+## Version: 1.0.4
 ## Title: MSBT [|cffffff80Options|r]
 ## Author: Mikord
 ## Notes: Load on demand options for Mik's Scrolling Battle Text.
 ## Dependencies: MikScrollingBattleText
 ## LoadOnDemand: 1
 ## X-Child-Of: MikScrollingBattleText
+## IconTexture: Interface\Icons\Ability_meleedamage
+## Category: Combat
 
 Localization\localization.xml
 
