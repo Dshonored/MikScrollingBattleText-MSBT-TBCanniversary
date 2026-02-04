@@ -1,6 +1,20 @@
 Mik's Scrolling Battle Text - Changelog
 ========================================
 
+Version 5.2.0
+-------------
+Release Date: February 3, 2026
+
+Changes:
+--------
+- Fixed triggers not being saved due to incorrect version number
+  * Root cause: The addon has a profile migration system at MSBTProfiles.lua:3463 that deletes
+    all triggers when upgrading from versions prior to 5.2 to prevent incompatible trigger data
+  * The version was incorrectly set to 1.0.4, causing the addon to think it was upgrading from
+    an old version every time it loaded, which resulted in all triggers being wiped
+  * Changed version from 1.0.4 to 5.2.0 to prevent this destructive migration from running
+  * Triggers will now persist correctly between game sessions
+
 Version 1.0.3
 -------------
 Release Date: January 26, 2026
