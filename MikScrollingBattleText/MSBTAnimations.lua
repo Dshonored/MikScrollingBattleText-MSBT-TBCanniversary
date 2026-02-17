@@ -494,7 +494,7 @@ local function DisplayMessage(message, scrollArea, isSticky, colorR, colorG, col
 	local currentProfile = MSBTProfiles.currentProfile
 
 	-- Inherit the font size if the passed value is invalid.
-	if fontSize == nil or fontSize < 4 or fontSize > 38 then
+	if fontSize == nil or fontSize < 4 or fontSize > 72 then
 		fontSize = saSettings.normalFontSize or currentProfile.normalFontSize
 	end
 
