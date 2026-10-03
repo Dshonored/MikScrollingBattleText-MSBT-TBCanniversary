@@ -3812,6 +3812,8 @@ local function SkillIconsTab_Create()
 		function (this, isChecked)
 			MSBTProfiles.SetOption(nil, "skillIconsDisabled", not isChecked)
 			if (isChecked) then controls.exclusiveCheckbox:Enable() else controls.exclusiveCheckbox:Disable() end
+			if (isChecked and controls.outlineCheckbox:GetChecked()) then controls.outlineSlider:Enable() else controls.outlineSlider:Disable() end
+			if (isChecked) then controls.outlineCheckbox:Enable() else controls.outlineCheckbox:Disable() end
 		end
 	)
 	controls.enableCheckbox = checkbox
@@ -3827,6 +3829,33 @@ local function SkillIconsTab_Create()
 		end
 	)
 	controls.exclusiveCheckbox = checkbox
+
+	-- Icon outline checkbox. Enabled by default.
+	checkbox = MSBTControls.CreateCheckbox(tabFrame)
+	objLocale = L.CHECKBOXES["enableIconOutline"]
+	checkbox:Configure(24, objLocale.label, objLocale.tooltip)
+	checkbox:SetPoint("TOPLEFT", controls.exclusiveCheckbox, "BOTTOMLEFT", 0, -10)
+	checkbox:SetClickHandler(
+		function (this, isChecked)
+			MSBTProfiles.SetOption(nil, "skillIconOutlineDisabled", not isChecked)
+			if (isChecked and controls.enableCheckbox:GetChecked()) then controls.outlineSlider:Enable() else controls.outlineSlider:Disable() end
+		end
+	)
+	controls.outlineCheckbox = checkbox
+
+	-- Icon outline thickness slider. Minimum 1 by default.
+	local slider = MSBTControls.CreateSlider(tabFrame)
+	objLocale = L.SLIDERS["iconOutlineThickness"]
+	slider:Configure(180, objLocale.label, objLocale.tooltip)
+	slider:SetPoint("TOPLEFT", controls.outlineCheckbox, "BOTTOMLEFT", 0, -35)
+	slider:SetMinMaxValues(1, 4)
+	slider:SetValueStep(1)
+	slider:SetValueChangedHandler(
+		function(this, value)
+			MSBTProfiles.SetOption(nil, "skillIconOutlineThickness", value)
+		end
+	)
+	controls.outlineSlider = slider
 
 
 	tabFrame.created = true
@@ -3845,11 +3874,24 @@ local function SkillIconsTab_OnShow()
 
 	controls.enableCheckbox:SetChecked(not currentProfile.skillIconsDisabled)
 	controls.exclusiveCheckbox:SetChecked(not currentProfile.exclusiveSkillsDisabled)
+	controls.outlineCheckbox:SetChecked(not currentProfile.skillIconOutlineDisabled)
+	controls.outlineSlider:SetValue(currentProfile.skillIconOutlineThickness or 1)
 
 	if (controls.enableCheckbox:GetChecked()) then
 		controls.exclusiveCheckbox:Enable()
 	else
 		controls.exclusiveCheckbox:Disable()
+	end
+
+	if (controls.enableCheckbox:GetChecked() and controls.outlineCheckbox:GetChecked()) then
+		controls.outlineCheckbox:Enable()
+		controls.outlineSlider:Enable()
+	elseif (controls.enableCheckbox:GetChecked()) then
+		controls.outlineCheckbox:Enable()
+		controls.outlineSlider:Disable()
+	else
+		controls.outlineCheckbox:Disable()
+		controls.outlineSlider:Disable()
 	end
 end
 

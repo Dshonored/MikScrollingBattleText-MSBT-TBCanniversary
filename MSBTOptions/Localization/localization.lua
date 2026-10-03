@@ -145,6 +145,7 @@ obj["currencyGains"]			= { label="Currency Gains", tooltip="Display notification
 obj["alwaysShowQuestItems"]		= { label="Always show quest items", tooltip="Always show quest items regardless of quality selections."}
 obj["enableIcons"]				= { label="Enable Skill Icons", tooltip="Displays icons for events that have a skill when possible."}
 obj["exclusiveSkills"]			= { label="Exclusive Skill Names", tooltip="Only show skill names when an icon is not available."}
+obj["enableIconOutline"]		= { label="Enable Icon Outline", tooltip="Displays a black outline behind skill icons."}
 
 
 ------------------------------
@@ -275,6 +276,7 @@ obj["hotThrottleTime"]		= { label="HoT Throttle Time", tooltip="The number of se
 obj["powerThrottleTime"]	= { label="Power Throttle Time", tooltip="The number of seconds to throttle power changes."}
 obj["skillThrottleTime"]	= { label="Throttle Time", tooltip="The number of seconds to throttle the skill."}
 obj["cooldownThreshold"]	= { label="Cooldown Threshold", tooltip="Skills with a cooldown less than the specified number of seconds will not be displayed."}
+obj["iconOutlineThickness"]	= { label="Icon Outline Thickness", tooltip="Sets the thickness of the black outline behind skill icons."}
 
 
 ------------------------------

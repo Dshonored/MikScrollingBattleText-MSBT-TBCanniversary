@@ -1,6 +1,17 @@
 Mik's Scrolling Battle Text - Changelog
 ========================================
 
+Version 5.3.0
+-------------
+Release Date: October 3, 2026
+
+Changes:
+--------
+- Added black outline behind skill icons
+  * Enabled by default with minimum thickness (1)
+  * New "Enable Icon Outline" checkbox in Skill Icons tab
+  * New "Icon Outline Thickness" slider (1-4)
+
 Version 5.2.1
 -------------
 Release Date: August 1, 2026

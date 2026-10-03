@@ -66,6 +66,10 @@ local DEFAULT_SOUND_PATH = "Interface\\AddOns\\MikScrollingBattleText\\Sounds\\"
 -- Path to the temporary texture Blizzard uses when a skill texture is not known.
 local TEMP_TEXTURE_PATH = "Interface\\Icons\\Temp"
 
+-- Icon outline defaults. Outline is a solid black backdrop behind the icon.
+local DEFAULT_ICON_OUTLINE_THICKNESS = 1
+local ICON_OUTLINE_TEXTURE = "Interface\\Buttons\\WHITE8X8"
+
 
 -------------------------------------------------------------------------------
 -- Private variables.
@@ -80,6 +84,7 @@ local animationFrame
 -- Pools of dynamically created display events and textures that are reused.
 local displayEventCache = {}
 local textureCache = {}
+local outlineCache = {}
 
 -- Animating display events.
 local animationData = {normal = {}, sticky = {}}
@@ -125,6 +130,50 @@ local function IsScrollAreaIconShown(scrollArea)
 
 	-- Return true if the scroll area valid and the icons are not disabled.
 	return saSettings and not saSettings.skillIconsDisabled or false
+end
+
+
+-- ****************************************************************************
+-- Returns whether icon outline is enabled for the passed scroll area.
+-- Default is enabled. Global profile setting can be overridden per scroll area.
+-- ****************************************************************************
+local function IsIconOutlineEnabled(saSettings)
+	if saSettings and saSettings.skillIconOutlineDisabled ~= nil then
+		return not saSettings.skillIconOutlineDisabled
+	end
+	local currentProfile = MSBTProfiles.currentProfile
+	if currentProfile and currentProfile.skillIconOutlineDisabled ~= nil then
+		return not currentProfile.skillIconOutlineDisabled
+	end
+	return true
+end
+
+
+-- ****************************************************************************
+-- Returns the icon outline thickness for the passed scroll area.
+-- ****************************************************************************
+local function GetIconOutlineThickness(saSettings)
+	if saSettings and saSettings.skillIconOutlineThickness then
+		return saSettings.skillIconOutlineThickness
+	end
+	local currentProfile = MSBTProfiles.currentProfile
+	if currentProfile and currentProfile.skillIconOutlineThickness then
+		return currentProfile.skillIconOutlineThickness
+	end
+	return DEFAULT_ICON_OUTLINE_THICKNESS
+end
+
+
+-- ****************************************************************************
+-- Sets a solid black color on the passed outline texture.
+-- ****************************************************************************
+local function SetOutlineColor(outline)
+	if outline.SetColorTexture then
+		outline:SetColorTexture(0, 0, 0, 1)
+	else
+		outline:SetTexture(ICON_OUTLINE_TEXTURE)
+		outline:SetVertexColor(0, 0, 0, 1)
+	end
 end
 
 
@@ -286,6 +335,9 @@ local function Display(message, saSettings, isSticky, colorR, colorG, colorB, fo
 		if displayEvent.texture then
 			displayEvent.texture:SetAlpha(0)
 		end
+		if displayEvent.iconOutline then
+			displayEvent.iconOutline:SetAlpha(0)
+		end
 	else
 		displayEvent = table_remove(displayEventCache) or { fontString = animationFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal") }
 	end
@@ -353,9 +405,45 @@ local function Display(message, saSettings, isSticky, colorR, colorG, colorB, fo
 		else
 			texture:SetPoint("RIGHT", fontString, "LEFT", -4, 0)
 		end
-		texture:SetDrawLayer(isSticky and "OVERLAY" or "ARTWORK")
+		texture:SetDrawLayer(isSticky and "OVERLAY" or "ARTWORK", 0)
 		texture:SetAlpha(0)
 		displayEvent.texture = texture
+
+		-- Optional solid outline behind the icon. Enabled by default.
+		if IsIconOutlineEnabled(saSettings) then
+			local thickness = GetIconOutlineThickness(saSettings)
+			local outline = displayEvent.iconOutline
+			if not outline then
+				outline = table_remove(outlineCache) or animationFrame:CreateTexture(nil, "ARTWORK")
+			end
+			outline:ClearAllPoints()
+			SetOutlineColor(outline)
+			outline:SetWidth(fontSize + thickness * 2)
+			outline:SetHeight(fontSize + thickness * 2)
+			outline:SetPoint("CENTER", texture, "CENTER", 0, 0)
+			outline:SetDrawLayer(isSticky and "OVERLAY" or "ARTWORK", -1)
+			outline:SetAlpha(0)
+			displayEvent.iconOutline = outline
+		elseif displayEvent.iconOutline then
+			outlineCache[#outlineCache + 1] = displayEvent.iconOutline
+			displayEvent.iconOutline:SetTexture(nil)
+			displayEvent.iconOutline:SetAlpha(0)
+			displayEvent.iconOutline = nil
+		end
+	else
+		-- No icon for this event, so reclaim any reused textures to avoid stale icons.
+		if displayEvent.texture then
+			textureCache[#textureCache + 1] = displayEvent.texture
+			displayEvent.texture:SetTexture(nil)
+			displayEvent.texture:SetAlpha(0)
+			displayEvent.texture = nil
+		end
+		if displayEvent.iconOutline then
+			outlineCache[#outlineCache + 1] = displayEvent.iconOutline
+			displayEvent.iconOutline:SetTexture(nil)
+			displayEvent.iconOutline:SetAlpha(0)
+			displayEvent.iconOutline = nil
+		end
 	end
 
 	-- Initialize timing properties.
@@ -519,6 +607,7 @@ end
 local function AnimateEvent(displayEvent)
 	local fontString = displayEvent.fontString
 	local texture = displayEvent.texture
+	local outline = displayEvent.iconOutline
 	local percentDone = displayEvent.elapsedTime / displayEvent.scrollTime
 
 	if percentDone <= 1 then
@@ -537,11 +626,17 @@ local function AnimateEvent(displayEvent)
 		if texture then
 			texture:SetAlpha(displayEvent.masterAlpha * displayEvent.alpha)
 		end
+		if outline then
+			outline:SetAlpha(displayEvent.masterAlpha * displayEvent.alpha)
+		end
 	else
 		-- Hide the text and set the animation complete flag.
 		fontString:SetAlpha(0)
 		if texture then
 			texture:SetAlpha(0)
+		end
+		if outline then
+			outline:SetAlpha(0)
 		end
 		displayEvent.animationComplete = true
 	end
@@ -556,7 +651,7 @@ local function OnUpdateAnimationFrame(this, elapsed)
 	local allInactive = true
 
 	-- Local variables to hold display event info.
-	local numEvents, displayEvent, texture
+	local numEvents, displayEvent, texture, outline
 
 	-- Loop through all of the animation arrays.
 	for _, animationArray in pairs(animationData) do
@@ -594,6 +689,14 @@ local function OnUpdateAnimationFrame(this, elapsed)
 						textureCache[#textureCache + 1] = texture
 						texture:SetTexture(nil)
 						displayEvent.texture = nil
+					end
+
+					-- Reclaim the outline to cache and clear it so it can be reused if there is one.
+					outline = displayEvent.iconOutline
+					if outline then
+						outlineCache[#outlineCache + 1] = outline
+						outline:SetTexture(nil)
+						displayEvent.iconOutline = nil
 					end
 
 					-- Reclaim the display event to cache so it can be reused.
